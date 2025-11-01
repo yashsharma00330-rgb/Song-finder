@@ -1,167 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎵 Song Searcher</title>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #0c0c0c;
-      color: white;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #111;
-      color: #ff007f;
-      font-size: 24px;
-      padding: 15px;
-      font-weight: bold;
-      box-shadow: 0 2px 8px rgba(255, 0, 127, 0.3);
-    }
-    input {
-      width: 70%;
-      max-width: 400px;
-      padding: 10px;
-      margin-top: 20px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-      font-size: 16px;
-    }
-    button {
-      background: #ff007f;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 25px;
-      margin-left: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #ff3399;
-    }
-    .song-card {
-      background: #1a1a1a;
-      border-radius: 12px;
-      margin: 20px auto;
-      width: 85%;
-      max-width: 500px;
-      padding: 15px;
-      box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
-      transition: 0.3s;
-    }
-    .song-card:hover {
-      transform: scale(1.02);
-    }
-    .song-card img {
-      width: 100%;
-      border-radius: 10px;
-    }
-    audio {
-      width: 100%;
-      margin-top: 10px;
-      border-radius: 8px;
-    }
-    .singers-list {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin: 15px auto;
-      max-width: 800px;
-    }
-    .singer-btn {
-      background: #222;
-      color: #ff007f;
-      border: 1px solid #ff007f;
-      border-radius: 20px;
-      padding: 8px 16px;
-      margin: 5px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .singer-btn:hover {
-      background: #ff007f;
-      color: white;
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Song Searcher + Playlist</title>
+<style>
+  :root{--bg:#0b0b0b;--card:#131313;--accent:#ff0066;--muted:#bfcbdc}
+  body{margin:0;font-family:Inter,system-ui,Arial;color:#fff;background:linear-gradient(180deg,#0b0b0b,#121212);min-height:100vh}
+  header{padding:14px 16px;text-align:center;background:rgba(0,0,0,0.2);font-weight:700;color:var(--accent)}
+  .container{padding:16px;max-width:980px;margin:0 auto}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;margin-bottom:12px}
+  input[type="text"]{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:#0f0f0f;color:#fff;width:68%;min-width:220px}
+  button{background:var(--accent);border:none;padding:10px 14px;border-radius:10px;color:#fff;font-weight:700;cursor:pointer}
+  .singers{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:8px 0 18px}
+  .chip{padding:8px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.04);background:#111;color:var(--muted);cursor:pointer}
+  .chip:hover{background:var(--accent);color:#fff}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  .card{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.6);text-align:left}
+  .thumb{width:100%;border-radius:8px;display:block}
+  .meta{margin-top:8px}
+  .title{font-weight:700;color:#fff}
+  .sub{color:var(--muted);font-size:13px;margin-top:6px}
+  .controls{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+  .btn-light{background:#222;padding:8px 10px;border-radius:8px;color:#fff;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+  #playlistBox{margin-top:20px}
+  .plist-item{background:#0f0f0f;padding:8px;border-radius:8px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
+  .p-thumb{width:64px;height:48px;object-fit:cover;border-radius:6px}
+  .p-meta{flex:1}
+  .small{font-size:13px;color:var(--muted)}
+  footer{padding:14px;text-align:center;color:var(--muted);font-size:13px}
+  @media(max-width:480px){ input[type="text"]{width:60%} }
+</style>
 </head>
 <body>
+<header>🎵 Song Searcher — YouTube + Playlist</header>
 
-  <header>🎵 SONG SEARCHER</header>
+<div class="container">
+  <div class="singers" id="topSingers"></div>
 
-  <h3>🔥 Top Singers</h3>
-  <div class="singers-list" id="topSingers"></div>
-
-  <div>
-    <input type="text" id="searchInput" placeholder="Enter artist or song name..." />
-    <button onclick="searchSongs()">Search</button>
+  <div class="row">
+    <input id="q" placeholder="Search artist or song (e.g. Arijit Singh)" />
+    <button id="searchBtn">Search</button>
+    <button id="showPlaylistBtn" class="btn-light">Show Playlist</button>
+    <button id="clearPlaylistBtn" class="btn-light">Clear Playlist</button>
   </div>
 
-  <div id="results"></div>
+  <div id="results" class="grid"></div>
 
-  <script>
-    const topSingers = [
-      "Arijit Singh",
-      "Shreya Ghoshal",
-      "Neha Kakkar",
-      "Atif Aslam",
-      "Jubin Nautiyal",
-      "Sonu Nigam",
-      "KK (Krishnakumar Kunnath)",
-      "Badshah",
-      "Yo Yo Honey Singh",
-      "Sidhu Moose Wala",
-      "Masoom Sharma",
-      "Millind Gaba",
-      "Diljit Dosanjh",
-      "Jassie Gill",
-      "Raju Punjabi",
-      "Dhanda Nyoliwala"
-    ];
+  <section id="playlistBox">
+    <h3 style="color:var(--accent);margin-bottom:8px">▶ My Playlist</h3>
+    <div id="playlistItems"></div>
+  </section>
+</div>
 
-    // Display singer buttons
-    const singerContainer = document.getElementById("topSingers");
-    singerContainer.innerHTML = topSingers.map(name => 
-      `<button class="singer-btn" onclick="searchSongs('${name}')">${name}</button>`
-    ).join("");
+<footer>Made by Yash — Replace <code>API_KEY</code> with your key.</footer>
 
-    async function searchSongs(queryFromButton) {
-      const query = queryFromButton || document.getElementById("searchInput").value.trim();
-      const resultDiv = document.getElementById("results");
-      resultDiv.innerHTML = "<p>Loading...</p>";
+<script>
+/* ==== CONFIG ==== */
+const API_KEY = "AIzaSyCI2aI3ABJzTrvmpW0VufH-ucYaLhGyc0A"; // <-- paste your YouTube API key here
+const TOP_SINGERS = [
+  "Arijit Singh","Shreya Ghoshal","Neha Kakkar","Atif Aslam","Jubin Nautiyal",
+  "Sonu Nigam","KK (Krishnakumar Kunnath)","Badshah","Yo Yo Honey Singh",
+  "Sidhu Moose Wala","Masoom Sharma","Millind Gaba","Diljit Dosanjh","Jassie Gill","Raju Punjabi","Dhanda Nyoliwala"
+];
+const STORAGE_KEY = "yt_songsearcher_playlist_v1";
 
-      if (!query) {
-        resultDiv.innerHTML = "<p>Please enter or choose a singer!</p>";
-        return;
-      }
+/* ==== UI INIT ==== */
+const topSingersEl = document.getElementById('topSingers');
+topSingersEl.innerHTML = TOP_SINGERS.map(s=>`<div class="chip" data-name="${escapeHtml(s)}">${escapeHtml(s)}</div>`).join('');
+topSingersEl.addEventListener('click', e=>{
+  const chip = e.target.closest('.chip'); if(!chip) return;
+  const name = chip.dataset.name;
+  document.getElementById('q').value = name + " songs";
+  doSearch(name + " songs");
+});
 
-      try {
-        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&limit=100`);
-        const data = await response.json();
+document.getElementById('searchBtn').addEventListener('click', ()=>doSearch(document.getElementById('q').value));
+document.getElementById('q').addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(document.getElementById('q').value) });
+document.getElementById('showPlaylistBtn').addEventListener('click', renderPlaylist);
+document.getElementById('clearPlaylistBtn').addEventListener('click', ()=>{ if(confirm('Clear playlist?')) { localStorage.removeItem(STORAGE_KEY); playlist=[]; renderPlaylist(); alert('Playlist cleared'); } });
 
-        if (data.results.length === 0) {
-          resultDiv.innerHTML = "<p>No songs found!</p>";
-          return;
-        }
+const resultsEl = document.getElementById('results');
+let playlist = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 
-        resultDiv.innerHTML = data.results.map(song => `
-          <div class="song-card">
-            <img src="${song.artworkUrl100.replace('100x100','500x500')}" alt="Thumbnail">
-            <p><b>${song.trackName}</b><br>${song.artistName}</p>
-            <audio controls src="${song.previewUrl}"></audio>
-          </div>
-        `).join("");
-      } catch (err) {
-        resultDiv.innerHTML = "<p>Error loading songs!</p>";
-        console.error(err);
-      }
+/* ==== SEARCH ==== */
+async function doSearch(query){
+  query = (query||'').trim();
+  if(!query) { alert('Type a search query'); return; }
+  resultsEl.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#bbb">Loading...</p>';
+
+  try{
+    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=24&q=${encodeURIComponent(query)}&key=${API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if(!data.items || data.items.length===0){
+      resultsEl.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#bbb">No results</p>'; return;
     }
-  </script>
+    resultsEl.innerHTML = data.items.map(i=>{
+      const vid = i.id.videoId;
+      const title = i.snippet.title;
+      const ch = i.snippet.channelTitle;
+      const thumb = i.snippet.thumbnails.high?.url || i.snippet.thumbnails.default.url;
+      return `
+        <div class="card">
+          <img class="thumb" src="${thumb}" alt="">
+          <div class="meta">
+            <div class="title">${escapeHtml(title)}</div>
+            <div class="sub">${escapeHtml(ch)}</div>
+            <div class="controls">
+              <button class="btn-play" data-vid="${vid}">Play</button>
+              <button class="btn-add" data-vid="${vid}" data-title="${escapeAttr(title)}" data-channel="${escapeAttr(ch)}" data-thumb="${escapeAttr(thumb)}">Add to Playlist</button>
+              <button class="btn-yout" data-vid="${vid}" style="background:#222" >Open YT</button>
+            </div>
+            <div style="margin-top:10px">
+              <iframe width="100%" height="240" src="https://www.youtube.com/embed/${vid}?rel=0&modestbranding=1" frameborder="0" allowfullscreen></iframe>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch(err){
+    console.error(err);
+    resultsEl.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#bbb">Error loading results</p>';
+  }
+}
 
+/* ==== EVENTS (delegate) ==== */
+resultsEl.addEventListener('click', e=>{
+  if(e.target.matches('.btn-add')){
+    const b = e.target;
+    const item = { videoId: b.dataset.vid, title: b.dataset.title, channel: b.dataset.channel, thumb: b.dataset.thumb };
+    addToPlaylist(item);
+  } else if(e.target.matches('.btn-play')){
+    const vid = e.target.dataset.vid;
+    // play by replacing results area with player modal-like embed at top
+    playVideoInline(vid);
+  } else if(e.target.matches('.btn-yout')){
+    const vid = e.target.dataset.vid;
+    window.open('https://www.youtube.com/watch?v='+vid,'_blank');
+  }
+});
+
+/* ==== PLAYLIST FUNCTIONS ==== */
+function addToPlaylist(item){
+  // avoid duplicates by videoId
+  if(playlist.find(p=>p.videoId===item.videoId)){ alert('Already in playlist'); return; }
+  playlist.unshift(item); // newest first
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(playlist));
+  renderPlaylist();
+  alert('Added to playlist');
+}
+
+function removeFromPlaylist(videoId){
+  playlist = playlist.filter(p=>p.videoId!==videoId);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(playlist));
+  renderPlaylist();
+}
+
+function playFromPlaylist(videoId){
+  playVideoInline(videoId);
+}
+
+/* render playlist UI */
+function renderPlaylist(){
+  const box = document.getElementById('playlistItems');
+  if(!playlist || playlist.length===0){ box.innerHTML = '<p class="small">No songs in playlist. Add some!</p>'; return; }
+  box.innerHTML = playlist.map(item=>`
+    <div class="plist-item">
+      <img class="p-thumb" src="${item.thumb}" alt="">
+      <div class="p-meta">
+        <div style="font-weight:700">${escapeHtml(item.title)}</div>
+        <div class="small">${escapeHtml(item.channel)}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="playFromPlaylist('${item.videoId}')" class="btn-light">Play</button>
+        <button onclick="removeFromPlaylist('${item.videoId}')" class="btn-light">Remove</button>
+      </div>
+    </div>
+  `).join('');
+  // scroll to playlist
+  box.scrollIntoView({behavior:'smooth'});
+}
+
+/* ==== PLAY INLINE (replace results with player for chosen video) ==== */
+function playVideoInline(videoId){
+  // show an overlay-like player at top of results (or replace first column)
+  const playerHtml = `
+    <div style="grid-column:1/-1;background:#000;border-radius:12px;padding:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div style="flex:1">
+          <iframe width="100%" height="360" src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+        <div style="min-width:120px;text-align:right">
+          <button onclick="document.getElementById('results').scrollIntoView({behavior:'smooth'})" class="btn-light">Close</button>
+        </div>
+      </div>
+    </div>
+  `;
+  // insert at top of results
+  resultsEl.insertAdjacentHTML('afterbegin', playerHtml);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ==== UTIL ==== */
+function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return (s||'').replace(/"/g,'&quot;').replace(/'/g,"&#39;"); }
+
+/* ==== INIT: render playlist on load ==== */
+renderPlaylist();
+</script>
 </body>
 </html>
