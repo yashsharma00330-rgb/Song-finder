@@ -1,197 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Song Searcher + Playlist</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yash Music Player 🎵</title>
 <style>
-  :root{--bg:#0b0b0b;--card:#131313;--accent:#ff0066;--muted:#bfcbdc}
-  body{margin:0;font-family:Inter,system-ui,Arial;color:#fff;background:linear-gradient(180deg,#0b0b0b,#121212);min-height:100vh}
-  header{padding:14px 16px;text-align:center;background:rgba(0,0,0,0.2);font-weight:700;color:var(--accent)}
-  .container{padding:16px;max-width:980px;margin:0 auto}
-  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;margin-bottom:12px}
-  input[type="text"]{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:#0f0f0f;color:#fff;width:68%;min-width:220px}
-  button{background:var(--accent);border:none;padding:10px 14px;border-radius:10px;color:#fff;font-weight:700;cursor:pointer}
-  .singers{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:8px 0 18px}
-  .chip{padding:8px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.04);background:#111;color:var(--muted);cursor:pointer}
-  .chip:hover{background:var(--accent);color:#fff}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
-  .card{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.6);text-align:left}
-  .thumb{width:100%;border-radius:8px;display:block}
-  .meta{margin-top:8px}
-  .title{font-weight:700;color:#fff}
-  .sub{color:var(--muted);font-size:13px;margin-top:6px}
-  .controls{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
-  .btn-light{background:#222;padding:8px 10px;border-radius:8px;color:#fff;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
-  #playlistBox{margin-top:20px}
-  .plist-item{background:#0f0f0f;padding:8px;border-radius:8px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
-  .p-thumb{width:64px;height:48px;object-fit:cover;border-radius:6px}
-  .p-meta{flex:1}
-  .small{font-size:13px;color:var(--muted)}
-  footer{padding:14px;text-align:center;color:var(--muted);font-size:13px}
-  @media(max-width:480px){ input[type="text"]{width:60%} }
+  :root {
+    --bg: #0b0b0b;
+    --card: #141414;
+    --accent: #ff0066;
+    --muted: #bbb;
+  }
+  body {
+    margin: 0;
+    background: linear-gradient(180deg,#0b0b0b,#151515);
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+    min-height: 100vh;
+  }
+  header {
+    text-align: center;
+    padding: 14px;
+    background: rgba(0,0,0,0.4);
+    color: var(--accent);
+    font-weight: bold;
+  }
+  .container {
+    max-width: 900px;
+    margin: auto;
+    padding: 16px;
+  }
+  input[type="text"] {
+    padding: 10px;
+    width: 70%;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background: #111;
+    color: white;
+  }
+  button {
+    background: var(--accent);
+    color: white;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .song-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+  }
+  .title {
+    font-weight: 700;
+    margin-top: 8px;
+  }
+  .controls {
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn-small {
+    background: #333;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+  }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 20px;
+    padding: 10px;
+  }
+  audio {
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 8px;
+  }
 </style>
 </head>
 <body>
-<header>🎵 Song Searcher — YouTube + Playlist</header>
+<header>🎶 Yash Music Player — No Ads</header>
 
 <div class="container">
-  <div class="singers" id="topSingers"></div>
-
-  <div class="row">
-    <input id="q" placeholder="Search artist or song (e.g. Arijit Singh)" />
+  <div style="text-align:center;">
+    <input id="songInput" placeholder="Enter song name or artist..." />
     <button id="searchBtn">Search</button>
-    <button id="showPlaylistBtn" class="btn-light">Show Playlist</button>
-    <button id="clearPlaylistBtn" class="btn-light">Clear Playlist</button>
+    <button id="showPlaylist" style="background:#444;">Show Playlist</button>
   </div>
 
-  <div id="results" class="grid"></div>
+  <div id="songResults" class="song-list"></div>
 
-  <section id="playlistBox">
-    <h3 style="color:var(--accent);margin-bottom:8px">▶ My Playlist</h3>
-    <div id="playlistItems"></div>
+  <section id="playlistBox" style="margin-top:30px;display:none;">
+    <h3 style="color:var(--accent)">▶ My Playlist</h3>
+    <div id="playlist"></div>
   </section>
 </div>
 
-<footer>Made by Yash — Replace <code>AIzaSyCI2aI3ABJzTrvmpW0VufH-ucYaLhGyc0A</code> with your YouTube API key.</footer>
+<footer>Made by Yash 💖 | Works on GitHub Pages</footer>
 
 <script>
-/* ==== CONFIG ==== */
-const API_KEY = "AIzaSyCI2aI3ABJzTrvmpW0VufH-ucYaLhGyc0A"; // <-- Paste your YouTube API key here
-const TOP_SINGERS = [
-  "Arijit Singh","Shreya Ghoshal","Neha Kakkar","Atif Aslam","Jubin Nautiyal",
-  "Sonu Nigam","KK (Krishnakumar Kunnath)","Badshah","Yo Yo Honey Singh",
-  "Sidhu Moose Wala","Masoom Sharma","Millind Gaba","Diljit Dosanjh","Jassie Gill","Raju Punjabi","Dhanda Nyoliwala"
+// =======================
+// CONFIG
+// =======================
+const SONGS = [
+  { title: "Kesariya", artist: "Arijit Singh", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+  { title: "Tum Hi Ho", artist: "Arijit Singh", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+  { title: "Tera Ban Jaunga", artist: "Akhil Sachdeva", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+  { title: "Raataan Lambiyan", artist: "Jubin Nautiyal", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+  { title: "Apna Bana Le", artist: "Arijit Singh", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" }
 ];
-const STORAGE_KEY = "yt_songsearcher_playlist_v1";
+let playlist = JSON.parse(localStorage.getItem("playlist_v1") || "[]");
 
-/* ==== UI INIT ==== */
-const topSingersEl = document.getElementById('topSingers');
-topSingersEl.innerHTML = TOP_SINGERS.map(s=>`<div class="chip" data-name="${escapeHtml(s)}">${escapeHtml(s)}</div>`).join('');
-topSingersEl.addEventListener('click', e=>{
-  const chip = e.target.closest('.chip'); if(!chip) return;
-  const name = chip.dataset.name;
-  document.getElementById('q').value = name + " songs";
-  doSearch(name + " songs");
-});
+// =======================
+// SEARCH FUNCTION
+// =======================
+document.getElementById("searchBtn").onclick = () => {
+  const q = document.getElementById("songInput").value.toLowerCase();
+  const results = SONGS.filter(s => s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q));
+  showResults(results);
+};
 
-document.getElementById('searchBtn').addEventListener('click', ()=>doSearch(document.getElementById('q').value));
-document.getElementById('q').addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(document.getElementById('q').value) });
-document.getElementById('showPlaylistBtn').addEventListener('click', renderPlaylist);
-document.getElementById('clearPlaylistBtn').addEventListener('click', ()=>{ if(confirm('Clear playlist?')) { localStorage.removeItem(STORAGE_KEY); playlist=[]; renderPlaylist(); alert('Playlist cleared'); } });
-
-const resultsEl = document.getElementById('results');
-let playlist = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-
-/* ==== SEARCH ==== */
-async function doSearch(query){
-  query = (query||'').trim();
-  if(!query) { alert('Type a search query'); return; }
-  resultsEl.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#bbb">Loading...</p>';
-
-  try{
-    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=24&q=${encodeURIComponent(query)}&key=${API_KEY}`;
-    const res = await fetch(url);
-    const data = await res.json();
-
-    if(!data.items || data.items.length===0){
-      resultsEl.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#bbb">No results</p>'; return;
-    }
-
-    // filter out restricted videos
-    const playable = data.items.filter(i=>i.id.videoId);
-    resultsEl.innerHTML = playable.map(i=>{
-      const vid = i.id.videoId;
-      const title = i.snippet.title;
-      const ch = i.snippet.channelTitle;
-      const thumb = i.snippet.thumbnails.high?.url || i.snippet.thumbnails.default.url;
-      return `
-        <div class="card">
-          <img class="thumb" src="${thumb}" alt="">
-          <div class="meta">
-            <div class="title">${escapeHtml(title)}</div>
-            <div class="sub">${escapeHtml(ch)}</div>
-            <div class="controls">
-              <button class="btn-play" data-vid="${vid}">Play</button>
-              <button class="btn-add" data-vid="${vid}" data-title="${escapeAttr(title)}" data-channel="${escapeAttr(ch)}" data-thumb="${escapeAttr(thumb)}">Add to Playlist</button>
-              <button class="btn-yout" data-vid="${vid}" style="background:#222" >Open YT</button>
-            </div>
-            <div style="margin-top:10px">
-              <iframe width="100%" height="240" src="https://www.youtube.com/embed/${vid}?rel=0&modestbranding=1"
-              frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-  } catch(err){
-    console.error(err);
-    resultsEl.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#bbb">Error loading results</p>';
+function showResults(list){
+  const box = document.getElementById("songResults");
+  if(list.length === 0){
+    box.innerHTML = `<p style="text-align:center;color:#888;">No songs found</p>`;
+    return;
   }
-}
-
-/* ==== EVENTS (delegate) ==== */
-resultsEl.addEventListener('click', e=>{
-  if(e.target.matches('.btn-add')){
-    const b = e.target;
-    const item = { videoId: b.dataset.vid, title: b.dataset.title, channel: b.dataset.channel, thumb: b.dataset.thumb };
-    addToPlaylist(item);
-  } else if(e.target.matches('.btn-play')){
-    playVideoInline(e.target.dataset.vid);
-  } else if(e.target.matches('.btn-yout')){
-    window.open('https://www.youtube.com/watch?v='+e.target.dataset.vid,'_blank');
-  }
-});
-
-/* ==== PLAYLIST ==== */
-function addToPlaylist(item){
-  if(playlist.find(p=>p.videoId===item.videoId)){ alert('Already in playlist'); return; }
-  playlist.unshift(item);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(playlist));
-  renderPlaylist();
-  alert('Added to playlist');
-}
-function removeFromPlaylist(videoId){
-  playlist = playlist.filter(p=>p.videoId!==videoId);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(playlist));
-  renderPlaylist();
-}
-function playFromPlaylist(videoId){ playVideoInline(videoId); }
-function renderPlaylist(){
-  const box = document.getElementById('playlistItems');
-  if(!playlist.length){ box.innerHTML = '<p class="small">No songs in playlist.</p>'; return; }
-  box.innerHTML = playlist.map(item=>`
-    <div class="plist-item">
-      <img class="p-thumb" src="${item.thumb}" alt="">
-      <div class="p-meta">
-        <div style="font-weight:700">${escapeHtml(item.title)}</div>
-        <div class="small">${escapeHtml(item.channel)}</div>
+  box.innerHTML = list.map(song => `
+    <div class="card">
+      <div class="title">${song.title}</div>
+      <div style="font-size:13px;color:#bbb;">${song.artist}</div>
+      <div class="controls">
+        <div class="btn-small" onclick='playSong("${song.src}")'>Play</div>
+        <div class="btn-small" onclick='addToPlaylist("${song.title}","${song.artist}","${song.src}")'>Add</div>
       </div>
-      <div style="display:flex;gap:8px">
-        <button onclick="playFromPlaylist('${item.videoId}')" class="btn-light">Play</button>
-        <button onclick="removeFromPlaylist('${item.videoId}')" class="btn-light">Remove</button>
+      <audio controls>
+        <source src="${song.src}" type="audio/mpeg">
+      </audio>
+    </div>
+  `).join('');
+}
+
+// =======================
+// PLAYLIST FUNCTIONS
+// =======================
+function addToPlaylist(title, artist, src){
+  if(playlist.find(s=>s.src===src)){
+    alert("Already in playlist!");
+    return;
+  }
+  playlist.push({title, artist, src});
+  localStorage.setItem("playlist_v1", JSON.stringify(playlist));
+  alert("Added to playlist!");
+}
+
+document.getElementById("showPlaylist").onclick = () => {
+  const box = document.getElementById("playlistBox");
+  box.style.display = box.style.display === "none" ? "block" : "none";
+  renderPlaylist();
+};
+
+function renderPlaylist(){
+  const pbox = document.getElementById("playlist");
+  if(playlist.length === 0){
+    pbox.innerHTML = `<p style="color:#888;">No songs yet. Add some!</p>`;
+    return;
+  }
+  pbox.innerHTML = playlist.map(s=>`
+    <div class="card">
+      <div class="title">${s.title}</div>
+      <div style="font-size:13px;color:#bbb;">${s.artist}</div>
+      <audio controls>
+        <source src="${s.src}" type="audio/mpeg">
+      </audio>
+      <div class="controls">
+        <div class="btn-small" onclick='removeSong("${s.src}")'>Remove</div>
       </div>
     </div>
   `).join('');
 }
-function playVideoInline(videoId){
-  const playerHtml = `
-    <div style="grid-column:1/-1;background:#000;border-radius:12px;padding:10px">
-      <iframe width="100%" height="360" src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1"
-      frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-      <div style="text-align:right;margin-top:8px">
-        <button onclick="document.getElementById('results').scrollIntoView({behavior:'smooth'})" class="btn-light">Close</button>
-      </div>
-    </div>
-  `;
-  resultsEl.insertAdjacentHTML('afterbegin', playerHtml);
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
-function escapeAttr(s){ return (s||'').replace(/"/g,'&quot;').replace(/'/g,"&#39;"); }
 
-renderPlaylist();
+function removeSong(src){
+  playlist = playlist.filter(s=>s.src!==src);
+  localStorage.setItem("playlist_v1", JSON.stringify(playlist));
+  renderPlaylist();
+}
+
+function playSong(src){
+  const audio = new Audio(src);
+  audio.play();
+}
 </script>
 </body>
 </html>
