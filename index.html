@@ -1,209 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yash Music Player 🎵</title>
-<style>
-  :root {
-    --bg: #0b0b0b;
-    --card: #141414;
-    --accent: #ff0066;
-    --muted: #bbb;
-  }
-  body {
-    margin: 0;
-    background: linear-gradient(180deg,#0b0b0b,#151515);
-    font-family: 'Poppins', sans-serif;
-    color: #fff;
-    min-height: 100vh;
-  }
-  header {
-    text-align: center;
-    padding: 14px;
-    background: rgba(0,0,0,0.4);
-    color: var(--accent);
-    font-weight: bold;
-  }
-  .container {
-    max-width: 900px;
-    margin: auto;
-    padding: 16px;
-  }
-  input[type="text"] {
-    padding: 10px;
-    width: 70%;
-    border-radius: 10px;
-    border: none;
-    outline: none;
-    background: #111;
-    color: white;
-  }
-  button {
-    background: var(--accent);
-    color: white;
-    padding: 10px 14px;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .song-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
-    gap: 12px;
-    margin-top: 20px;
-  }
-  .card {
-    background: var(--card);
-    border-radius: 12px;
-    padding: 10px;
-    text-align: center;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.6);
-  }
-  .title {
-    font-weight: 700;
-    margin-top: 8px;
-  }
-  .controls {
-    margin-top: 8px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-  }
-  .btn-small {
-    background: #333;
-    padding: 6px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    color: white;
-  }
-  footer {
-    text-align: center;
-    color: var(--muted);
-    font-size: 13px;
-    margin-top: 20px;
-    padding: 10px;
-  }
-  audio {
-    width: 100%;
-    margin-top: 10px;
-    border-radius: 8px;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Song Searcher 🎵</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #2b5876, #4e4376);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    input {
+      width: 70%;
+      padding: 10px;
+      margin: 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #ff9800;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #ffa726;
+    }
+    .singer-list, .song-list {
+      margin-top: 20px;
+      padding: 10px;
+    }
+    .singer-item, .song-item {
+      background: rgba(255, 255, 255, 0.1);
+      margin: 8px auto;
+      width: 90%;
+      border-radius: 10px;
+      padding: 10px;
+    }
+    audio {
+      margin-top: 10px;
+      width: 80%;
+    }
+  </style>
 </head>
 <body>
-<header>🎶 Yash Music Player — No Ads</header>
+  <header>🎧 Song Searcher</header>
 
-<div class="container">
-  <div style="text-align:center;">
-    <input id="songInput" placeholder="Enter song name or artist..." />
-    <button id="searchBtn">Search</button>
-    <button id="showPlaylist" style="background:#444;">Show Playlist</button>
+  <input type="text" id="searchInput" placeholder="Search your song or singer..." />
+  <button onclick="searchSongs()">Search</button>
+
+  <div class="singer-list" id="singerList">
+    <h2>Top Singers 🎤</h2>
   </div>
 
-  <div id="songResults" class="song-list"></div>
+  <div class="song-list" id="songList"></div>
 
-  <section id="playlistBox" style="margin-top:30px;display:none;">
-    <h3 style="color:var(--accent)">▶ My Playlist</h3>
-    <div id="playlist"></div>
-  </section>
-</div>
+  <script>
+    const topSingers = [
+      "Arijit Singh", "Shreya Ghoshal", "Neha Kakkar", "Jubin Nautiyal", 
+      "Atif Aslam", "KK (Krishnakumar Kunnath)", "Sunidhi Chauhan", "Armaan Malik",
+      "Palak Muchhal", "Badshah", "Yo Yo Honey Singh", "Sidhu Moosewala",
+      "Karan Aujla", "AP Dhillon", "Shubh", "B Praak", "Ammy Virk",
+      "Diljit Dosanjh", "Jass Manak", "Guru Randhawa", "Sonu Nigam",
+      "Masoom Sharma", "Millind Gaba", "Jassie Gill", "Raju Punjabi", "Dhanda Nyoliwala"
+    ];
 
-<footer>Made by Yash 💖 | Works on GitHub Pages</footer>
+    const sampleSongs = [
+      { name: "Kesariya", artist: "Arijit Singh", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+      { name: "Raataan Lambiyan", artist: "Jubin Nautiyal", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+      { name: "Kalaastar", artist: "Yo Yo Honey Singh", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+      { name: "295", artist: "Sidhu Moosewala", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+      { name: "Lehanga", artist: "Jass Manak", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+      { name: "Filhall", artist: "B Praak", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" }
+    ];
 
-<script>
-// =======================
-// CONFIG
-// =======================
-const SONGS = [
-  { title: "Kesariya", artist: "Arijit Singh", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-  { title: "Tum Hi Ho", artist: "Arijit Singh", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-  { title: "Tera Ban Jaunga", artist: "Akhil Sachdeva", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
-  { title: "Raataan Lambiyan", artist: "Jubin Nautiyal", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
-  { title: "Apna Bana Le", artist: "Arijit Singh", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" }
-];
-let playlist = JSON.parse(localStorage.getItem("playlist_v1") || "[]");
+    // Display top singers
+    const singerDiv = document.getElementById("singerList");
+    topSingers.forEach(singer => {
+      const div = document.createElement("div");
+      div.classList.add("singer-item");
+      div.textContent = singer;
+      singerDiv.appendChild(div);
+    });
 
-// =======================
-// SEARCH FUNCTION
-// =======================
-document.getElementById("searchBtn").onclick = () => {
-  const q = document.getElementById("songInput").value.toLowerCase();
-  const results = SONGS.filter(s => s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q));
-  showResults(results);
-};
+    // Search & play song
+    function searchSongs() {
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      const songList = document.getElementById("songList");
+      songList.innerHTML = "<h2>Search Results 🎶</h2>";
 
-function showResults(list){
-  const box = document.getElementById("songResults");
-  if(list.length === 0){
-    box.innerHTML = `<p style="text-align:center;color:#888;">No songs found</p>`;
-    return;
-  }
-  box.innerHTML = list.map(song => `
-    <div class="card">
-      <div class="title">${song.title}</div>
-      <div style="font-size:13px;color:#bbb;">${song.artist}</div>
-      <div class="controls">
-        <div class="btn-small" onclick='playSong("${song.src}")'>Play</div>
-        <div class="btn-small" onclick='addToPlaylist("${song.title}","${song.artist}","${song.src}")'>Add</div>
-      </div>
-      <audio controls>
-        <source src="${song.src}" type="audio/mpeg">
-      </audio>
-    </div>
-  `).join('');
-}
+      const results = sampleSongs.filter(song =>
+        song.name.toLowerCase().includes(search) || song.artist.toLowerCase().includes(search)
+      );
 
-// =======================
-// PLAYLIST FUNCTIONS
-// =======================
-function addToPlaylist(title, artist, src){
-  if(playlist.find(s=>s.src===src)){
-    alert("Already in playlist!");
-    return;
-  }
-  playlist.push({title, artist, src});
-  localStorage.setItem("playlist_v1", JSON.stringify(playlist));
-  alert("Added to playlist!");
-}
+      if (results.length === 0) {
+        songList.innerHTML += "<p>No songs found 😔</p>";
+        return;
+      }
 
-document.getElementById("showPlaylist").onclick = () => {
-  const box = document.getElementById("playlistBox");
-  box.style.display = box.style.display === "none" ? "block" : "none";
-  renderPlaylist();
-};
-
-function renderPlaylist(){
-  const pbox = document.getElementById("playlist");
-  if(playlist.length === 0){
-    pbox.innerHTML = `<p style="color:#888;">No songs yet. Add some!</p>`;
-    return;
-  }
-  pbox.innerHTML = playlist.map(s=>`
-    <div class="card">
-      <div class="title">${s.title}</div>
-      <div style="font-size:13px;color:#bbb;">${s.artist}</div>
-      <audio controls>
-        <source src="${s.src}" type="audio/mpeg">
-      </audio>
-      <div class="controls">
-        <div class="btn-small" onclick='removeSong("${s.src}")'>Remove</div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function removeSong(src){
-  playlist = playlist.filter(s=>s.src!==src);
-  localStorage.setItem("playlist_v1", JSON.stringify(playlist));
-  renderPlaylist();
-}
-
-function playSong(src){
-  const audio = new Audio(src);
-  audio.play();
-}
-</script>
+      results.forEach(song => {
+        const div = document.createElement("div");
+        div.classList.add("song-item");
+        div.innerHTML = `
+          <h3>${song.name}</h3>
+          <p>${song.artist}</p>
+          <audio controls>
+            <source src="${song.url}" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
+        `;
+        songList.appendChild(div);
+      });
+    }
+  </script>
 </body>
 </html>
