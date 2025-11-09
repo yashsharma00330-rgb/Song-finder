@@ -1,130 +1,248 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Song Searcher 🎵</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Haryana Emergency — Quick</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #2b5876, #4e4376);
-      color: #fff;
-      margin: 0;
-      padding: 0;
-      text-align: center;
+    :root{
+      --bg:#f4f8ff; --card:#ffffff; --primary:#0b6bd6; --accent:#28a745; --danger:#d93025;
+      --muted:#6b7280; --glass: rgba(255,255,255,0.8);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
-    header {
-      background-color: rgba(0, 0, 0, 0.3);
-      padding: 15px;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    input {
-      width: 70%;
-      padding: 10px;
-      margin: 15px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #ff9800;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      color: white;
-      font-weight: bold;
-    }
-    button:hover {
-      background-color: #ffa726;
-    }
-    .singer-list, .song-list {
-      margin-top: 20px;
-      padding: 10px;
-    }
-    .singer-item, .song-item {
-      background: rgba(255, 255, 255, 0.1);
-      margin: 8px auto;
-      width: 90%;
-      border-radius: 10px;
-      padding: 10px;
-    }
-    audio {
-      margin-top: 10px;
-      width: 80%;
-    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#eaf4ff 0%, #ffffff 100%);color:#111}
+    .app{max-width:720px;margin:0 auto;padding:16px;min-height:100vh;box-sizing:border-box}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    h1{font-size:20px;margin:0}
+    .top-row{display:flex;gap:8px;margin:12px 0}
+    .search{flex:1;padding:10px;border-radius:10px;border:1px solid #dfe7f6;background:white}
+    button.btn{border:0;padding:10px 12px;border-radius:10px;font-weight:600;cursor:pointer}
+    button.add{background:var(--accent);color:white}
+    .sos{background:var(--danger);color:white;font-size:18px;padding:14px;border-radius:12px;width:100%}
+
+    /* list */
+    .list{margin-top:10px;max-height:62vh;overflow:auto;padding-right:6px}
+    .card{display:flex;justify-content:space-between;align-items:center;padding:12px;margin-bottom:8px;background:var(--card);border-radius:10px;box-shadow:0 4px 14px rgba(11,107,214,0.06)}
+    .card .left{display:flex;flex-direction:column}
+    .name{font-weight:700}
+    .num{color:var(--muted);font-size:13px;margin-top:4px}
+    .actions{display:flex;gap:8px;align-items:center}
+
+    .icon-btn{background:transparent;border:0;padding:6px;border-radius:8px;cursor:pointer}
+    .icon-btn.call{background:linear-gradient(90deg,var(--primary),#0c88ff);color:white}
+    .icon-btn.copy{background:transparent;border:1px solid #e6eefc;color:var(--primary)}
+
+    /* modal */
+    .modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:none;align-items:center;justify-content:center;padding:16px}
+    .modal{width:100%;max-width:420px;background:var(--card);padding:14px;border-radius:12px;box-shadow:0 12px 40px rgba(2,6,23,0.12)}
+    .modal h3{margin:0 0 8px 0}
+    .field{display:block;margin:8px 0}
+    input[type="text"]{width:100%;padding:10px;border:1px solid #e7eefc;border-radius:8px}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+    @media (min-width:720px){.app{padding:28px}}
   </style>
 </head>
 <body>
-  <header>🎧 Song Searcher</header>
 
-  <input type="text" id="searchInput" placeholder="Search your song or singer..." />
-  <button onclick="searchSongs()">Search</button>
+<div class="app">
+  <header>
+    <div style="width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--primary),#0c88ff);display:flex;align-items:center;justify-content:center;color:white;font-weight:800">HR</div>
+    <div>
+      <h1>🚨 Haryana Emergency</h1>
+      <div style="color:var(--muted);font-size:13px">All Haryana government helplines — quick call & copy</div>
+    </div>
+  </header>
 
-  <div class="singer-list" id="singerList">
-    <h2>Top Singers 🎤</h2>
+  <div class="top-row">
+    <input id="search" class="search" placeholder="Search (police, ambulance, fire...)" />
+    <button id="openAdd" class="btn add">➕ Add</button>
   </div>
 
-  <div class="song-list" id="songList"></div>
+  <button id="sosBtn" class="sos">🔥 SOS — Call 112</button>
 
-  <script>
-    const topSingers = [
-      "Arijit Singh", "Shreya Ghoshal", "Neha Kakkar", "Jubin Nautiyal", 
-      "Atif Aslam", "KK (Krishnakumar Kunnath)", "Sunidhi Chauhan", "Armaan Malik",
-      "Palak Muchhal", "Badshah", "Yo Yo Honey Singh", "Sidhu Moosewala",
-      "Karan Aujla", "AP Dhillon", "Shubh", "B Praak", "Ammy Virk",
-      "Diljit Dosanjh", "Jass Manak", "Guru Randhawa", "Sonu Nigam",
-      "Masoom Sharma", "Millind Gaba", "Jassie Gill", "Raju Punjabi", "Dhanda Nyoliwala"
-    ];
+  <div class="list" id="list"></div>
 
-    const sampleSongs = [
-      { name: "Kesariya", artist: "Arijit Singh", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-      { name: "Raataan Lambiyan", artist: "Jubin Nautiyal", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-      { name: "Kalaastar", artist: "Yo Yo Honey Singh", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
-      { name: "295", artist: "Sidhu Moosewala", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
-      { name: "Lehanga", artist: "Jass Manak", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
-      { name: "Filhall", artist: "B Praak", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" }
-    ];
+  <footer>Made by Yash • Save numbers locally on your device</footer>
+</div>
 
-    // Display top singers
-    const singerDiv = document.getElementById("singerList");
-    topSingers.forEach(singer => {
-      const div = document.createElement("div");
-      div.classList.add("singer-item");
-      div.textContent = singer;
-      singerDiv.appendChild(div);
-    });
+<!-- Add modal -->
+<div id="modal" class="modal-back" role="dialog" aria-hidden="true">
+  <div class="modal" role="document">
+    <h3>Add New Contact</h3>
+    <div class="field"><label>Name</label><input id="addName" type="text" placeholder="e.g. Local Police Station" /></div>
+    <div class="field"><label>Number</label><input id="addNum" type="text" placeholder="Digits with STD if required" /></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button id="cancelAdd" class="btn" style="background:#f3f4f6">Cancel</button>
+      <button id="saveAdd" class="btn add">Save</button>
+    </div>
+  </div>
+</div>
 
-    // Search & play song
-    function searchSongs() {
-      const search = document.getElementById("searchInput").value.toLowerCase();
-      const songList = document.getElementById("songList");
-      songList.innerHTML = "<h2>Search Results 🎶</h2>";
+<script>
+/* Haryana-only default list */
+const DEFAULT = [
+  {"name":"Police (Haryana)","number":"112"},
+  {"name":"Ambulance (Haryana Health Dept)","number":"108"},
+  {"name":"Fire Service (Haryana)","number":"101"},
+  {"name":"Women Helpline (Haryana Police)","number":"1091"},
+  {"name":"Women Helpline WhatsApp (Haryana)","number":"8595900100"},
+  {"name":"Child Helpline (Haryana)","number":"1098"},
+  {"name":"Senior Citizen Helpline (Haryana)","number":"14567"},
+  {"name":"Electricity Complaint (UHBVN / DHBVN)","number":"1912"},
+  {"name":"Water Supply Complaint (Haryana Jal Board)","number":"1916"},
+  {"name":"Traffic Helpline (Haryana Police)","number":"1073"},
+  {"name":"Disaster Management (Haryana)","number":"1070"},
+  {"name":"Tourist Helpline (Haryana Tourism)","number":"1363"},
+  {"name":"Anti Corruption Bureau (Haryana)","number":"1064"},
+  {"name":"Animal Helpline (Haryana)","number":"1962"},
+  {"name":"Forest & Wildlife Helpline (Haryana)","number":"18001801516"},
+  {"name":"Women & Child Development Dept (Haryana)","number":"18001809987"},
+  {"name":"Haryana Roadways Enquiry","number":"18001803030"},
+  {"name":"Municipal Complaint (Swachh Haryana)","number":"18001803002"},
+  {"name":"PWD Road Complaint (Haryana)","number":"18001803033"},
+  {"name":"Food & Civil Supplies Helpline (Haryana)","number":"18001802020"},
+  {"name":"Chief Minister Helpline (CM Window Haryana)","number":"1100"},
+  {"name":"COVID-19 Helpline (Haryana)","number":"1075"},
+  {"name":"Health Helpline (Haryana Health Dept)","number":"104"},
+  {"name":"Blood Bank Helpline (Haryana)","number":"104"},
+  {"name":"Cyber Crime Helpline (Haryana Police)","number":"1930"}
+];
 
-      const results = sampleSongs.filter(song =>
-        song.name.toLowerCase().includes(search) || song.artist.toLowerCase().includes(search)
-      );
+const STORAGE_KEY = "haryana_numbers_v1";
 
-      if (results.length === 0) {
-        songList.innerHTML += "<p>No songs found 😔</p>";
-        return;
-      }
+let numbers = loadNumbers();
+let filtered = numbers.slice();
 
-      results.forEach(song => {
-        const div = document.createElement("div");
-        div.classList.add("song-item");
-        div.innerHTML = `
-          <h3>${song.name}</h3>
-          <p>${song.artist}</p>
-          <audio controls>
-            <source src="${song.url}" type="audio/mpeg">
-            Your browser does not support the audio element.
-          </audio>
-        `;
-        songList.appendChild(div);
-      });
+const listEl = document.getElementById('list');
+const searchEl = document.getElementById('search');
+const modal = document.getElementById('modal');
+const openAdd = document.getElementById('openAdd');
+const cancelAdd = document.getElementById('cancelAdd');
+const saveAdd = document.getElementById('saveAdd');
+const addName = document.getElementById('addName');
+const addNum = document.getElementById('addNum');
+const sosBtn = document.getElementById('sosBtn');
+
+function loadNumbers(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed) && parsed.length) return parsed;
     }
-  </script>
+  } catch(e){}
+  // default clone
+  return JSON.parse(JSON.stringify(DEFAULT));
+}
+
+function saveNumbers(){
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(numbers));
+  } catch(e){}
+}
+
+function renderList(list){
+  listEl.innerHTML = "";
+  if(!list.length){
+    listEl.innerHTML = '<div style="padding:12px;color:var(--muted)">No results</div>';
+    return;
+  }
+  for(const item of list){
+    const card = document.createElement('div'); card.className='card';
+    const left = document.createElement('div'); left.className='left';
+    const name = document.createElement('div'); name.className='name'; name.textContent = item.name;
+    const num = document.createElement('div'); num.className='num'; num.textContent = item.number;
+    left.appendChild(name); left.appendChild(num);
+
+    const actions = document.createElement('div'); actions.className='actions';
+    // call button
+    const callBtn = document.createElement('a');
+    callBtn.href = `tel:${item.number}`;
+    callBtn.className='icon-btn call';
+    callBtn.textContent = 'Call';
+    callBtn.style.padding = '8px 10px'; callBtn.style.borderRadius='8px'; callBtn.style.textDecoration='none'; callBtn.style.color='white';
+
+    // copy button
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'icon-btn copy';
+    copyBtn.textContent = 'Copy';
+    copyBtn.onclick = (e)=>{
+      e.preventDefault();
+      copyToClipboard(item.number);
+      showToast(`${item.number} copied`);
+    };
+
+    actions.appendChild(callBtn);
+    actions.appendChild(copyBtn);
+
+    card.appendChild(left);
+    card.appendChild(actions);
+    listEl.appendChild(card);
+  }
+}
+
+function copyToClipboard(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    return navigator.clipboard.writeText(text);
+  }
+  // fallback
+  const t = document.createElement('textarea');
+  t.value = text; document.body.appendChild(t);
+  t.select(); try{ document.execCommand('copy'); }catch(e){} t.remove();
+}
+
+function showToast(msg){
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.position='fixed'; el.style.bottom='18px'; el.style.left='50%'; el.style.transform='translateX(-50%)';
+  el.style.background='rgba(0,0,0,0.7)'; el.style.color='white'; el.style.padding='8px 12px'; el.style.borderRadius='8px';
+  el.style.zIndex=9999; document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1500);
+}
+
+// search logic
+searchEl.addEventListener('input', (e)=>{
+  const q = e.target.value.trim().toLowerCase();
+  if(!q) filtered = numbers.slice();
+  else filtered = numbers.filter(it=> (it.name||"").toLowerCase().includes(q) || (it.number||"").includes(q) );
+  renderList(filtered);
+});
+
+// add modal handlers
+openAdd.addEventListener('click', ()=>{ modal.style.display='flex'; addName.value=''; addNum.value=''; addName.focus(); });
+cancelAdd.addEventListener('click', ()=> modal.style.display='none');
+saveAdd.addEventListener('click', ()=>{
+  const n = addName.value.trim(), num = addNum.value.trim();
+  if(!n || !num){ alert('Fill both fields'); return; }
+  // avoid duplicate number
+  if(numbers.some(it=>it.number===num)){ alert('Number already exists'); return; }
+  numbers.unshift({name:n, number:num});
+  saveNumbers();
+  filtered = numbers.slice();
+  renderList(filtered);
+  modal.style.display='none';
+  showToast('Saved');
+});
+
+// SOS button: call 112 + prepare message (opens sms/wa via url)
+sosBtn.addEventListener('click', ()=>{
+  // open dialer
+  window.location.href = 'tel:112';
+  // then prepare message and offer to open SMS/WhatsApp
+  setTimeout(()=>{
+    const mapsLink = `https://maps.google.com?q=`;
+    const msg = `Emergency! I need help. Location: ${mapsLink} (open maps to share your live location)`;
+    if(confirm('Open SMS app to send emergency message? (You can paste location)')){
+      // Use SMS uri - will open SMS app on mobile
+      const enc = encodeURIComponent(msg);
+      window.location.href = `sms:?body=${enc}`;
+    }
+  }, 700);
+});
+
+// initial render
+renderList(filtered);
+</script>
 </body>
 </html>
